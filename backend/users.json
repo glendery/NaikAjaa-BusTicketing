@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1764891278982,
+    "nama": "Glen ",
+    "email": "glensirgr@gmail.com",
+    "password": "X@dery12",
+    "walletAddress": "0x3dE1CB3eb822b7cD78aD9e083211AEe677dbf625",
+    "walletPrivateKey": "0x3f8a12c5a3bd05aa27c4bf09ef4758f6ff0009d1930da67876ec11c33acf0795"
+  },
+  {
+    "id": "admin-default",
+    "nama": "Super Admin",
+    "email": "admin",
+    "password": "admin1234",
+    "walletAddress": "0x3E499979D8da37F3dD8c7f0c4692F9F7902dfA28",
+    "walletPrivateKey": "0x8370e7d5c4de638dce5cd35f5d1024375b0ae5b6507e4c3d5bb17919cfe64f37",
+    "role": "admin"
+  }
+]
