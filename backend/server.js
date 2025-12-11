@@ -21,44 +21,56 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-    origin: function (origin, callback) {
-        // Izinkan request tanpa origin (seperti Postman atau mobile app)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) === -1) {
-            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: 'https://sumut-bus-ticketing-frontend.vercel.app', 
+    methods: ['GET', 'POST'], 
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true // Izinkan cookie jika ada
+    credentials: true
 }));
+
+// 3. Helmet: Konfigurasi "Paranoid" (Anti-ZAP Complaints)
 app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            // Izinkan script dari Midtrans dan Vercel
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://app.sandbox.midtrans.com", "https://app.midtrans.com", "https://api.midtrans.com"],
-            // Izinkan koneksi ke API dan Blockchain
-            connectSrc: ["'self'", "https://app.sandbox.midtrans.com", "https://api.midtrans.com", "https://sepolia.infura.io", "https://eth-sepolia.g.alchemy.com"],
-            // Izinkan gambar dari berbagai sumber (logo bus, QR code)
-            imgSrc: ["'self'", "data:", "https://api.qrserver.com", "https://*.vercel.app"],
-            // Izinkan iframe (PENTING untuk Midtrans Snap Popup)
-            frameSrc: ["'self'", "https://app.sandbox.midtrans.com", "https://app.midtrans.com"],
-            upgradeInsecureRequests: [],
-        }
-    },
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Agar frontend bisa load gambar
+    // Paksa browser matikan fitur sniffing
+    xContentTypeOptions: true,
+    
+    // Cegah DNS Prefetching (ZAP kadang komplain ini)
+    dnsPrefetchControl: { allow: false },
+    
+    // Cegah Clickjacking (Deny all iframe)
+    frameguard: { action: 'deny' },
+    
+    // HSTS: Paksa HTTPS setahun
     hsts: {
-        maxAge: 31536000, // Paksa HTTPS selama 1 tahun
+        maxAge: 31536000,
         includeSubDomains: true,
         preload: true
     },
-    frameguard: {
-        action: 'deny' // Mencegah Clickjacking
-    }
+    
+    // Content Security Policy (CSP) Paling Ketat
+    contentSecurityPolicy: {
+        directives: {
+            // Tolak semua sumber by default
+            defaultSrc: ["'none'"],
+            
+            // Hanya izinkan script dari domain sendiri (Hapus unsafe-inline!)
+            scriptSrc: ["'self'"],
+            
+            // Hanya izinkan koneksi ke diri sendiri & Midtrans API
+            connectSrc: ["'self'", "https://app.sandbox.midtrans.com"],
+            
+            // Gambar hanya dari diri sendiri (Hapus data: dan wildcard)
+            imgSrc: ["'self'"],
+            
+            // CSS hanya dari diri sendiri
+            styleSrc: ["'self'"],
+            
+            // Jangan izinkan object/embed
+            objectSrc: ["'none'"],
+            
+            upgradeInsecureRequests: [],
+        }
+    },
+    // Referrer Policy yang ketat
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
 
 // --- [PENTING] KONFIGURASI EMAIL PENGIRIM ---
