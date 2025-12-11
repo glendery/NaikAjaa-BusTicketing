@@ -1,71 +1,106 @@
-# 🚌 NaikAjaa - Blockchain E-Ticketing System
+<div align="center">
+  <a href="./">
+    <img src="frontend/public/logos/Logo.png" alt="Logo NaikAjaa" width="180">
+  </a>
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Security](https://img.shields.io/badge/security-OWASP%20ZAP%20Checked-blue)
-![Blockchain](https://img.shields.io/badge/blockchain-Ethereum%20Sepolia-purple)
-![License](https://img.shields.io/badge/license-MIT-green)
+  <h1 align="center">NaikAjaa - Secure Blockchain E-Ticketing</h1>
 
-**NaikAjaa** adalah platform pemesanan tiket bus berbasis Web3 yang mengintegrasikan pembayaran konvensional (Midtrans) dengan teknologi Blockchain (Ethereum). Setiap tiket yang dibeli dicetak otomatis (*minted*) menjadi NFT (ERC-721) sebagai bukti kepemilikan yang *immutable* dan anti-pemalsuan.
-
----
-
-## 🚀 Fitur Utama
-
-- **Hybrid Architecture:** Integrasi mulus antara Web2 (Database) dan Web3 (Blockchain).
-- **Automated Minting:** Tiket dicetak otomatis ke Blockchain setelah pembayaran Midtrans sukses (Webhook).
-- **Gasless User Experience:** Penumpang tidak perlu membayar Gas Fee; transaksi ditangani oleh server.
-- **QR Code Verification:** Validasi tiket transparan menggunakan Hash Transaksi Blockchain.
-- **Seat Management:** Pemilihan kursi interaktif dan *real-time*.
-
----
-
-## 🛠️ Teknologi yang Digunakan
-
-### Frontend
-- **React.js (Vite)** - Antarmuka Pengguna.
-- **Bootstrap & SweetAlert2** - UI/UX Styling.
-- **Ethers.js** - Interaksi dengan Smart Contract.
-
-### Backend
-- **Node.js & Express** - Server Logic.
-- **MongoDB Atlas** - Database Penyimpanan Data User/Order.
-- **Web3.js** - Interaksi Server-to-Blockchain.
-- **Midtrans Snap** - Payment Gateway.
-
-### Blockchain
-- **Solidity** - Smart Contract (ERC-721).
-- **Sepolia Testnet** - Jaringan Deployment.
-- **Hardhat/Remix** - Development Environment.
-
-### DevSecOps Tools
-Proyek ini menerapkan prinsip keamanan sejak dini (*Shift-Left Security*):
-- 🛡️ **Plan:** Threat Modeling (STRIDE).
-- 🔍 **Dev:** ESLint untuk Static Code Analysis (SAST).
-- 📦 **Build:** `npm audit` untuk pengecekan dependensi.
-- ⚡ **Test:** OWASP ZAP untuk Dynamic Application Security Testing (DAST).
-- 🚀 **Release:** CI/CD Pipeline via Vercel & GitHub Actions.
+  <p align="center">
+    <strong>Platform Pemesanan Tiket Bus Antarkota Berbasis Web3 & DevSecOps</strong>
+    <br />
+    Integrasi Hybrid: Web2 (Database) + Web3 (Ethereum Blockchain)
+    <br />
+    <br />
+    <a href="https://github.com/glendery/NaikAjaa-BusTicketing/issues">
+      <img src="https://img.shields.io/github/issues/glendery/NaikAjaa-BusTicketing?style=flat-square&logo=github&logoColor=white" alt="Issues">
+    </a>
+    <img src="https://img.shields.io/badge/security-OWASP%20ZAP%20Checked-blue?style=flat-square&logo=owasp&logoColor=white" alt="Security ZAP">
+    <img src="https://img.shields.io/badge/blockchain-Ethereum%20Sepolia-purple?style=flat-square&logo=ethereum&logoColor=white" alt="Ethereum Sepolia">
+    <img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License">
+  </p>
+</div>
 
 ---
 
-## 📸 Screenshots
+## 📖 Tentang Proyek
 
-| Landing Page | Booking Seat |
+**NaikAjaa** adalah solusi modern untuk masalah percaloan dan transparansi tiket bus. Sistem ini menerapkan arsitektur **Hybrid Web3**, di mana data pengguna disimpan di Database (MongoDB) untuk performa, sementara aset tiket dicatat di **Blockchain Ethereum (ERC-721)** untuk keamanan dan validitas anti-palsu.
+
+Proyek ini dikembangkan dengan metodologi **DevSecOps**, memastikan keamanan aplikasi dijaga ketat mulai dari tahap Perencanaan (*Plan*) hingga Perilisan (*Release*).
+
+---
+
+## 🛡️ Implementasi DevSecOps
+
+Proyek ini memenuhi standar keamanan siklus pengembangan perangkat lunak (*SDLC*) dengan rincian sebagai berikut:
+
+| Tahap | Aktivitas Keamanan | Tools / Bukti |
+| :--- | :--- | :--- |
+| **1. PLAN** | Analisis Ancaman & Mitigasi Risiko | **Threat Modeling (STRIDE)** |
+| **2. DEV** | Analisis Kode Statis (SAST) | **ESLint & Prettier** |
+| **3. BUILD** | Audit Dependensi & Library | **npm audit** (0 Vulnerabilities) |
+| **4. TEST** | Pengujian Keamanan Aplikasi (DAST) | **OWASP ZAP** |
+| **5. RELEASE** | Otomasi CI/CD Pipeline | **GitHub Actions & Vercel** |
+| **6. DEPLOY** | Arsitektur Cloud Serverless | **Vercel Infrastructure** |
+
+---
+
+## 📸 Dokumentasi & Bukti Teknis
+
+Berikut adalah dokumentasi visual implementasi sistem dan keamanan.
+
+### 1. Threat Modeling (Tahap PLAN)
+Diagram alur serangan (*attack vectors*) yang dipetakan menggunakan pendekatan STRIDE untuk mengidentifikasi celah keamanan sejak dini.
+<br/>
+<div align="center">
+  <img src="frontend/public/logos/threat-model.png" alt="Threat Model Diagram" width="85%">
+</div>
+
+### 2. Security Scanning (Tahap TEST)
+Hasil pemindaian kerentanan dinamis menggunakan **OWASP ZAP** pada lingkungan produksi.
+<br/>
+<div align="center">
+  <img src="frontend/public/logos/zap-scan.png" alt="Hasil Scan OWASP ZAP" width="90%">
+</div>
+
+### 3. Antarmuka Aplikasi (UI/UX)
+
+| Halaman Utama (Pencarian) | E-Ticket NFT (Verified) |
 | :---: | :---: |
-| ![Home](frontend/public/logos/Logo.png) | *(Masukkan Screenshot Pilih Kursi)* |
-
-| E-Ticket NFT | Security Scan (ZAP) |
-| :---: | :---: |
-| *(Masukkan Screenshot Tiket)* | *(Masukkan Screenshot ZAP)* |
-
-*(Catatan: Ganti path gambar di atas dengan file gambar asli di folder kamu)*
+| <img src="frontend/public/logos/ui-home.png" alt="Home UI" width="100%"> | <img src="frontend/public/logos/ui-ticket.png" alt="Ticket NFT UI" width="100%"> |
+| *Fitur pencarian rute & jadwal* | *Tiket dengan Hash Blockchain & QR Code* |
 
 ---
 
-## 📦 Instalasi & Menjalankan Project
+## 🛠️ Teknologi (Tech Stack)
 
-Ikuti langkah berikut untuk menjalankan proyek di komputer lokal:
+<div align="center">
+
+| Kategori | Teknologi |
+| :--- | :--- |
+| **Frontend** | React.js, Vite, Bootstrap 5, SweetAlert2 |
+| **Backend** | Node.js, Express.js, Helmet.js (Security Headers) |
+| **Database** | MongoDB Atlas (Cloud) |
+| **Blockchain** | Solidity (Smart Contract), Web3.js, Ethers.js |
+| **Network** | Ethereum Sepolia Testnet |
+| **Payment** | Midtrans Snap Gateway |
+| **DevOps** | Vercel, GitHub Actions |
+
+</div>
+
+---
+
+## 📦 Cara Menjalankan (Local Installation)
+
+Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal Anda:
+
+### Prasyarat
+- Node.js (v18+)
+- MongoDB (Local atau Atlas URI)
+- Akun Midtrans (Server Key)
+- Wallet Metamask (Private Key & Sepolia ETH)
 
 ### 1. Clone Repository
 ```bash
-git clone [https://github.com/username-kamu/NaikAjaa-Project.git](https://github.com/username-kamu/NaikAjaa-Project.git)
-cd NaikAjaa-Project
+git clone [https://github.com/glendery/NaikAjaa-BusTicketing.git](https://github.com/glendery/NaikAjaa-BusTicketing.git)
+cd NaikAjaa-BusTicketing
