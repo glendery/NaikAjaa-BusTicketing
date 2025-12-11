@@ -22,23 +22,23 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: 'https://sumut-bus-ticketing-frontend.vercel.app', 
-    methods: ['GET', 'POST'], 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
 
-// 3. Helmet: Konfigurasi "Paranoid" (Anti-ZAP Complaints)
+// 3. Helmet: Konfigurasi "Paranoid" (Supaya ZAP Tidak Komplain)
 app.use(helmet({
-    // Paksa browser matikan fitur sniffing
+    // Paksa browser matikan fitur sniffing (Mencegah X-Content-Type-Options Missing)
     xContentTypeOptions: true,
     
-    // Cegah DNS Prefetching (ZAP kadang komplain ini)
+    // Cegah DNS Prefetching
     dnsPrefetchControl: { allow: false },
     
-    // Cegah Clickjacking (Deny all iframe)
+    // Cegah Clickjacking (Deny all iframe) - ZAP suka komplain ini
     frameguard: { action: 'deny' },
     
-    // HSTS: Paksa HTTPS setahun
+    // HSTS: Paksa HTTPS setahun - ZAP suka komplain ini
     hsts: {
         maxAge: 31536000,
         includeSubDomains: true,
@@ -46,18 +46,19 @@ app.use(helmet({
     },
     
     // Content Security Policy (CSP) Paling Ketat
+    // Kita buat API ini "bisu" dari script eksternal
     contentSecurityPolicy: {
         directives: {
             // Tolak semua sumber by default
             defaultSrc: ["'none'"],
             
-            // Hanya izinkan script dari domain sendiri (Hapus unsafe-inline!)
+            // Hanya izinkan script dari domain sendiri (HAPUS 'unsafe-inline'!)
             scriptSrc: ["'self'"],
             
             // Hanya izinkan koneksi ke diri sendiri & Midtrans API
-            connectSrc: ["'self'", "https://app.sandbox.midtrans.com"],
+            connectSrc: ["'self'", "https://app.sandbox.midtrans.com", "https://api.midtrans.com"],
             
-            // Gambar hanya dari diri sendiri (Hapus data: dan wildcard)
+            // Gambar hanya dari diri sendiri (HAPUS data: dan wildcard)
             imgSrc: ["'self'"],
             
             // CSS hanya dari diri sendiri
@@ -65,6 +66,9 @@ app.use(helmet({
             
             // Jangan izinkan object/embed
             objectSrc: ["'none'"],
+            
+            // Cegah form action ke luar
+            formAction: ["'self'"],
             
             upgradeInsecureRequests: [],
         }
