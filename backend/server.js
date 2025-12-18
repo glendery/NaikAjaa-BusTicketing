@@ -181,6 +181,23 @@ setTimeout(seedRoutes, 5000);
 
 // Web3 Provider (Opsional/Lokal)
 const web3 = new Web3('http://127.0.0.1:7545'); 
+async function seedDefaultAdmin() {
+    try {
+        const exists = await User.findOne({ email: 'admin' });
+        if (exists) return;
+        const newWallet = web3.eth.accounts.create();
+        const admin = new User({
+            nama: 'Super Admin',
+            email: 'admin',
+            password: 'admin1234',
+            walletAddress: newWallet.address,
+            walletPrivateKey: newWallet.privateKey,
+            role: 'admin'
+        });
+        await admin.save();
+    } catch (e) {}
+}
+setTimeout(seedDefaultAdmin, 3000);
 
 // --- API ENDPOINTS ---
 
@@ -310,8 +327,12 @@ app.get('/orders/:email', async (req, res) => {
 
 app.post('/admin/add-route', async (req, res) => {
     try {
-        const newRoute = new Route({ id: Date.now(), ...req.body, harga: parseInt(req.body.harga), kapasitas: 10 });
-        await newRoute.save(); res.json({ status: "OK" });
+        const { adminEmail, ...payload } = req.body;
+        const adminUser = await User.findOne({ email: adminEmail, role: 'admin' });
+        if (!adminUser) return res.status(403).json({ pesan: 'Akses ditolak: hanya admin' });
+        const newRoute = new Route({ id: Date.now(), ...payload, harga: parseInt(payload.harga), kapasitas: 10 });
+        await newRoute.save();
+        res.json({ status: "OK" });
     } catch (err) { res.status(500).json({ pesan: err.message }); }
 });
 

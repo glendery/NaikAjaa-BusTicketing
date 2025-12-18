@@ -359,7 +359,11 @@ function Dashboard() {
       return 0; 
   });
 
-  const tambahRuteAdmin = () => { axios.post('https://sumut-bus-ticketing-backend.vercel.app/admin/add-route', newRute).then(() => { alert("Sukses!"); }); };
+  const tambahRuteAdmin = () => { 
+    axios.post('https://sumut-bus-ticketing-backend.vercel.app/admin/add-route', { adminEmail: user.email, ...newRute })
+      .then(() => { alert("Sukses!"); })
+      .catch(err => alert(err.response?.data?.pesan || "Gagal menyimpan rute"));
+  };
 
   if (!user) return null;
 
