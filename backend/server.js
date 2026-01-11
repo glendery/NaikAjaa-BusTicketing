@@ -141,15 +141,20 @@ let rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
 // PENTING: Hapus spasi/newline yang mungkin terbawa saat copy-paste
 rawServerKey = rawServerKey.replace(/\s/g, ''); 
 
+let rawClientKey = process.env.MIDTRANS_CLIENT_KEY || "";
+rawClientKey = rawClientKey.replace(/\s/g, '');
+
 // Mode Sandbox/Production
 const isProduction = false; // Tetap False (Sandbox) sesuai environment di screenshot
 
 const snap = new midtransClient.Snap({
     isProduction: isProduction,
-    serverKey: rawServerKey
+    serverKey: rawServerKey,
+    clientKey: rawClientKey
 });
 console.log(`💳 Midtrans Mode: SANDBOX`);
 console.log(`🔑 Server Key: ${rawServerKey.substring(0, 5)}... (Sanitized)`);
+console.log(`🔑 Client Key: ${rawClientKey.substring(0, 5)}... (Sanitized)`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
