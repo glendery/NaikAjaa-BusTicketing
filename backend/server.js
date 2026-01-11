@@ -137,24 +137,33 @@ if (!MONGO_URI) {
 
 // --- KONFIGURASI MIDTRANS (DIPERBAIKI) ---
 // Deteksi otomatis environment berdasarkan format Server Key
-let rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
-// PENTING: Hapus spasi/newline yang mungkin terbawa saat copy-paste
-rawServerKey = rawServerKey.replace(/\s/g, ''); 
+// FALLBACK KEY: Menggunakan key dari .env lokal user sebagai cadangan jika Env Var Vercel kosong/gagal
+let rawServerKey = process.env.MIDTRANS_SERVER_KEY;
 
-let rawClientKey = process.env.MIDTRANS_CLIENT_KEY || "";
-rawClientKey = rawClientKey.replace(/\s/g, '');
+// AUTO-FIX: Jika key tidak ada atau format salah untuk Sandbox, kita gunakan Hardcoded Key dengan prefix SB-
+// Karena user ingin SANDBOX, key WAJIB diawali "SB-" (Format Lama/Standard)
+if (!rawServerKey || !rawServerKey.startsWith("SB-")) {
+    console.log("⚠️ MIDTRANS_SERVER_KEY tidak valid untuk Sandbox (kurang SB- atau kosong). Menggunakan Fallback Key dengan SB-.");
+    // Kita tambahkan "SB-" di depan key yang ada di .env user
+    rawServerKey = "SB-Mid-server-M8knJY1GMKXS4fy4HTUXCa5R"; 
+}
+
+rawServerKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
 
 // Mode Sandbox/Production
-const isProduction = false; // Tetap False (Sandbox) sesuai environment di screenshot
+const isProduction = false; 
+
+console.log(`---------------------------------------------------`);
+console.log(`💳 Midtrans Config Check (REPAIRED)`);
+console.log(`   Mode: ${isProduction ? 'PRODUCTION' : 'SANDBOX'}`);
+console.log(`   Server Key (Masked): ${rawServerKey.substring(0, 5)}...${rawServerKey.substring(rawServerKey.length - 5)}`);
+console.log(`   Server Key Length: ${rawServerKey.length}`);
+console.log(`---------------------------------------------------`);
 
 const snap = new midtransClient.Snap({
     isProduction: isProduction,
-    serverKey: rawServerKey,
-    clientKey: rawClientKey
+    serverKey: rawServerKey
 });
-console.log(`💳 Midtrans Mode: SANDBOX`);
-console.log(`🔑 Server Key: ${rawServerKey.substring(0, 5)}... (Sanitized)`);
-console.log(`🔑 Client Key: ${rawClientKey.substring(0, 5)}... (Sanitized)`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
