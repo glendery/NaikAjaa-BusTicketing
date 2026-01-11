@@ -137,16 +137,25 @@ if (!MONGO_URI) {
 
 // --- KONFIGURASI MIDTRANS (DIPERBAIKI) ---
 // Deteksi otomatis environment berdasarkan format Server Key
-const rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
-const serverKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
+let rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
+rawServerKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
 
-const isProduction = serverKey && !serverKey.startsWith('SB-');
+// FORCE FIX: Jika user menggunakan Sandbox tapi lupa prefix 'SB-' di Vercel
+// Sesuai request user: "BUKANNYA TAMBAH SB DIDEPAN >?"
+if (rawServerKey && !rawServerKey.startsWith('SB-')) {
+    console.log("⚠️ Auto-fix: Menambahkan prefix 'SB-' ke Server Key");
+    rawServerKey = 'SB-' + rawServerKey;
+}
+
+// FORCE SANDBOX MODE agar sesuai dengan key yang sudah di-fix
+const isProduction = false; 
+
 const snap = new midtransClient.Snap({
     isProduction: isProduction,
-    serverKey: serverKey
+    serverKey: rawServerKey
 });
-console.log(`💳 Midtrans Mode: ${isProduction ? 'PRODUCTION' : 'SANDBOX'}`);
-console.log(`🔑 Server Key Length: ${serverKey.length} chars (Sanitized)`);
+console.log(`💳 Midtrans Mode: SANDBOX (FORCED)`);
+console.log(`🔑 Server Key Length: ${rawServerKey.length} chars (Sanitized & Prefixed)`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
