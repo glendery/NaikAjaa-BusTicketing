@@ -141,14 +141,14 @@ let rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
 rawServerKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
 
 // Mode Sandbox/Production
-const isProduction = false; // FORCE SANDBOX (Sesuai request user)
+const isProduction = false; // Tetap False (Sandbox) sesuai environment di screenshot
 
 const snap = new midtransClient.Snap({
     isProduction: isProduction,
     serverKey: rawServerKey
 });
-console.log(`💳 Midtrans Mode: SANDBOX (FORCED)`);
-console.log(`🔑 Server Key Length: ${rawServerKey.length} chars`);
+console.log(`💳 Midtrans Mode: SANDBOX`);
+console.log(`🔑 Server Key: ${rawServerKey} (Sesuai Screenshot)`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
