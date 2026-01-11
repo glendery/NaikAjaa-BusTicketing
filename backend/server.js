@@ -137,30 +137,17 @@ if (!MONGO_URI) {
 
 // --- KONFIGURASI MIDTRANS (DIPERBAIKI) ---
 // Deteksi otomatis environment berdasarkan format Server Key
-// FALLBACK KEY: Menggunakan key dari .env lokal user sebagai cadangan jika Env Var Vercel kosong/gagal
-let rawServerKey = process.env.MIDTRANS_SERVER_KEY;
-
-// AUTO-FIX: Jika key tidak ada atau format salah untuk Sandbox, kita gunakan Hardcoded Key dengan prefix SB-
-    // Karena user ingin SANDBOX, key WAJIB diawali "SB-" (Format Lama/Standard)
-    if (!rawServerKey || !rawServerKey.startsWith("SB-")) {
-        console.log("⚠️ MIDTRANS_SERVER_KEY tidak valid untuk Sandbox (kurang SB- atau kosong). Menggunakan Fallback Key dengan SB-.");
-        // Kita tambahkan "SB-" di depan key yang ada di .env user
-        // Split string untuk menghindari deteksi Git Secret Scanner
-        const p1 = "SB-Mid-server-";
-        const p2 = "M8knJY1GMKXS4fy4HTUXCa5R";
-        rawServerKey = p1 + p2; 
-    }
-
+let rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
 rawServerKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
 
-// Mode Sandbox/Production
+// Mode Sandbox (Selalu False sesuai permintaan user)
 const isProduction = false; 
 
 console.log(`---------------------------------------------------`);
-console.log(`💳 Midtrans Config Check (REPAIRED)`);
+console.log(`💳 Midtrans Configuration`);
 console.log(`   Mode: ${isProduction ? 'PRODUCTION' : 'SANDBOX'}`);
-console.log(`   Server Key (Masked): ${rawServerKey.substring(0, 5)}...${rawServerKey.substring(rawServerKey.length - 5)}`);
-console.log(`   Server Key Length: ${rawServerKey.length}`);
+// Tampilkan 10 karakter awal untuk debugging user (Aman, tidak full key)
+console.log(`   Active Server Key: ${rawServerKey.substring(0, 10)}... (Check if this matches your Dashboard)`);
 console.log(`---------------------------------------------------`);
 
 const snap = new midtransClient.Snap({
