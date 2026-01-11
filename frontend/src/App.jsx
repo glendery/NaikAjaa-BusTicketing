@@ -380,7 +380,7 @@ function Dashboard() {
   useEffect(() => {
       const kotaValid = daftarKota.find(k => k.toLowerCase() === cariAsal.toLowerCase());
       if(kotaValid) {
-          axios.get(`http://localhost:3000/info-lokasi?kota=${cariAsal}&tipe=loket`)
+          axios.get(`${config.API_BASE_URL}/info-lokasi?kota=${cariAsal}&tipe=loket`)
             .then(res => { setLoketOptions(res.data); setCariLokasi('SEMUA'); })
             .catch(() => setLoketOptions([]));
       }
@@ -389,7 +389,7 @@ function Dashboard() {
   useEffect(() => {
       const kotaValid = daftarKota.find(k => k.toLowerCase() === cariTujuan.toLowerCase());
       if(kotaValid) {
-          axios.get(`http://localhost:3000/info-lokasi?kota=${cariTujuan}&tipe=turun`)
+          axios.get(`${config.API_BASE_URL}/info-lokasi?kota=${cariTujuan}&tipe=turun`)
             .then(res => { setTurunOptions(res.data); setCariTurun('SEMUA'); })
             .catch(() => setTurunOptions([]));
       }
@@ -430,7 +430,7 @@ function Dashboard() {
   });
 
   const tambahRuteAdmin = () => { 
-    axios.post('http://localhost:3000/admin/add-route', { adminEmail: user.email, ...newRute })
+    axios.post(`${config.API_BASE_URL}/admin/add-route`, { adminEmail: user.email, ...newRute })
       .then(() => { alert("Sukses!"); })
       .catch(err => alert(err.response?.data?.pesan || "Gagal menyimpan rute"));
   };

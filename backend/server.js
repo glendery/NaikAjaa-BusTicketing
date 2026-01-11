@@ -309,7 +309,7 @@ app.get('/api/info-lokasi', (req, res) => {
     const dataKota = locationData[Object.keys(locationData).find(k => k.toLowerCase() === kota.toLowerCase())];
     if (dataKota && dataKota[mappedTipe]) res.json(dataKota[mappedTipe]); else res.json([]);
 });
-app.get('/kota', (req, res) => { res.json(Object.keys(locationData)); });
+app.get('/api/kota', (req, res) => { res.json(Object.keys(locationData)); });
 
 app.post('/api/beli', async (req, res) => {
     try {
