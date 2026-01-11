@@ -138,7 +138,8 @@ if (!MONGO_URI) {
 // --- KONFIGURASI MIDTRANS (DIPERBAIKI) ---
 // Deteksi otomatis environment berdasarkan format Server Key
 let rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
-rawServerKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
+// PENTING: Hapus spasi/newline yang mungkin terbawa saat copy-paste
+rawServerKey = rawServerKey.replace(/\s/g, ''); 
 
 // Mode Sandbox/Production
 const isProduction = false; // Tetap False (Sandbox) sesuai environment di screenshot
@@ -148,7 +149,7 @@ const snap = new midtransClient.Snap({
     serverKey: rawServerKey
 });
 console.log(`💳 Midtrans Mode: SANDBOX`);
-console.log(`🔑 Server Key: ${rawServerKey} (Sesuai Screenshot)`);
+console.log(`🔑 Server Key: ${rawServerKey.substring(0, 5)}... (Sanitized)`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
