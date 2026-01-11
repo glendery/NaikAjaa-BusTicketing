@@ -140,22 +140,15 @@ if (!MONGO_URI) {
 let rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
 rawServerKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
 
-// FORCE FIX: Jika user menggunakan Sandbox tapi lupa prefix 'SB-' di Vercel
-// Sesuai request user: "BUKANNYA TAMBAH SB DIDEPAN >?"
-if (rawServerKey && !rawServerKey.startsWith('SB-')) {
-    console.log("⚠️ Auto-fix: Menambahkan prefix 'SB-' ke Server Key");
-    rawServerKey = 'SB-' + rawServerKey;
-}
-
-// FORCE SANDBOX MODE agar sesuai dengan key yang sudah di-fix
-const isProduction = false; 
+// Mode Sandbox/Production
+const isProduction = false; // FORCE SANDBOX (Sesuai request user)
 
 const snap = new midtransClient.Snap({
     isProduction: isProduction,
     serverKey: rawServerKey
 });
 console.log(`💳 Midtrans Mode: SANDBOX (FORCED)`);
-console.log(`🔑 Server Key Length: ${rawServerKey.length} chars (Sanitized & Prefixed)`);
+console.log(`🔑 Server Key Length: ${rawServerKey.length} chars`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
