@@ -137,7 +137,11 @@ const BuyModal = ({ item, user, userPickup, userDropOff, onClose, onSuccess }) =
                     }
                 })
                 .catch(err => { 
-                    alert(err.response?.data?.pesan || err.message); 
+                    console.error("Error Detail:", err);
+                    const msg = err.response?.data?.pesan 
+                        ? `${err.response.data.pesan}${err.response.data.error ? ': ' + err.response.data.error : ''}`
+                        : err.message;
+                    alert(msg); 
                     setLoading(false); 
                 });
                 };

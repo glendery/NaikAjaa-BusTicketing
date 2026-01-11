@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const Web3 = require('web3');
 const cors = require('cors');
@@ -134,11 +135,13 @@ if (!MONGO_URI) {
 }
 
 // --- KONFIGURASI MIDTRANS (DIPERBAIKI) ---
-// Menggunakan nama variabel lingkungan yang benar
+// Deteksi otomatis environment berdasarkan format Server Key
+const isProduction = process.env.MIDTRANS_SERVER_KEY && !process.env.MIDTRANS_SERVER_KEY.startsWith('SB-');
 const snap = new midtransClient.Snap({
-    isProduction: false,
-    serverKey: process.env.MIDTRANS_SERVER_KEY // <--- INI PERBAIKANNYA
+    isProduction: isProduction,
+    serverKey: process.env.MIDTRANS_SERVER_KEY
 });
+console.log(`💳 Midtrans Mode: ${isProduction ? 'PRODUCTION' : 'SANDBOX'}`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
@@ -327,6 +330,7 @@ app.get('/api/kota', (req, res) => { res.json(Object.keys(locationData)); });
 
 app.post('/api/beli', async (req, res) => {
     try {
+        console.log("📩 Menerima pesanan:", req.body);
         const { idRute, emailUser, tanggal, promoCode, seatNumber, lokasiTurun, lokasiJemput, namaPenumpang, nikPenumpang } = req.body;
         const user = await User.findOne({ email: emailUser });
         
@@ -375,7 +379,7 @@ app.post('/api/beli', async (req, res) => {
         res.json({ status: "OK", token: transaction.token, orderId: orderId });
 
     } catch (err) {
-        console.log("Error Beli:", err.message);
+        console.error("❌ Error Beli:", err);
         res.status(500).json({ pesan: "Gagal memproses pesanan", error: err.message });
     }
 });
