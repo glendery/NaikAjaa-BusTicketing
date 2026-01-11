@@ -414,6 +414,16 @@ app.post('/api/admin/add-route', async (req, res) => {
 // --- [ENDPOINT PENTING] WEBHOOK + EMAIL OTOMATIS ---
 app.post('/midtrans-notification', async (req, res) => {
     try {
+        // Debug: Log payload yang masuk
+        console.log("🔔 Webhook Payload:", JSON.stringify(req.body).substring(0, 200) + "...");
+
+        // 1. Cek Validitas Payload Dasar
+        // Jika tidak ada order_id, ini mungkin notifikasi Subscription atau Test yang salah tipe
+        if (!req.body.order_id && !req.body.transaction_status) {
+            console.log("⚠️ Mengabaikan notifikasi invalid (Tanpa order_id/status). Mungkin Test Notification tipe Subscription?");
+            return res.status(200).send('OK (Ignored)');
+        }
+
         const statusResponse = await snap.transaction.notification(req.body);
         const orderId = statusResponse.order_id;
         const transactionStatus = statusResponse.transaction_status;
