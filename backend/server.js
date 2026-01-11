@@ -387,7 +387,35 @@ app.post('/api/beli', async (req, res) => {
             item_details: [{ id: rute.id ? rute.id.toString() : "RUTE-001", price: finalPrice, quantity: 1, name: `${rute.operator} Trip` }]
         };
 
-        const transaction = await snap.createTransaction(parameter);
+        // --- MANUAL API CALL TO MIDTRANS (BYPASS LIBRARY) ---
+        // Kita gunakan fetch manual agar kontrol penuh pada Auth Header
+        // URL Sandbox Midtrans
+        const midtransUrl = "https://app.sandbox.midtrans.com/snap/v1/transactions";
+        
+        // Encode Server Key ke Base64 (Basic Auth standard: key + ":")
+        const authString = Buffer.from(rawServerKey + ":").toString('base64');
+
+        console.log(`🔄 Menghubungi Midtrans (Manual Fetch)...`);
+        
+        const response = await fetch(midtransUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${authString}`
+            },
+            body: JSON.stringify(parameter)
+        });
+
+        const transaction = await response.json();
+
+        if (!response.ok) {
+            console.error("❌ Midtrans Error Response:", JSON.stringify(transaction));
+            throw new Error(transaction.error_messages ? transaction.error_messages.join(', ') : "Midtrans API Error");
+        }
+        
+        console.log("✅ Snap Token Berhasil:", transaction.token);
+        // ----------------------------------------------------
 
         const newOrder = new Order({
             orderId_Midtrans: orderId,
