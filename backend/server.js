@@ -387,31 +387,69 @@ app.post('/api/beli', async (req, res) => {
             item_details: [{ id: rute.id ? rute.id.toString() : "RUTE-001", price: finalPrice, quantity: 1, name: `${rute.operator} Trip` }]
         };
 
-        // --- MANUAL API CALL TO MIDTRANS (BYPASS LIBRARY) ---
-        // Kita gunakan fetch manual agar kontrol penuh pada Auth Header
-        // URL Sandbox Midtrans
-        const midtransUrl = "https://app.sandbox.midtrans.com/snap/v1/transactions";
+        // --- SMART RETRY MECHANISM FOR MIDTRANS KEYS ---
+        // Kita akan mencoba 2 kemungkinan Key:
+        // 1. Dengan Prefix "SB-" (Format Lama/Standard Sandbox)
+        // 2. Tanpa Prefix "SB-" (Format Baru/Unified)
         
-        // Encode Server Key ke Base64 (Basic Auth standard: key + ":")
-        const authString = Buffer.from(rawServerKey + ":").toString('base64');
-
-        console.log(`🔄 Menghubungi Midtrans (Manual Fetch)...`);
+        // Bersihkan key dasar (buang SB- jika ada, kita akan rakit ulang)
+        let cleanKey = hardcodedKey.replace(/^SB-/, ''); 
         
-        const response = await fetch(midtransUrl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `Basic ${authString}`
-            },
-            body: JSON.stringify(parameter)
-        });
+        // Daftar kandidat key yang akan dicoba
+        const candidateKeys = [
+            "SB-" + cleanKey, // Prioritas 1: Pakai SB-
+            cleanKey          // Prioritas 2: Polos
+        ];
 
-        const transaction = await response.json();
+        let transaction = null;
+        let lastError = null;
+        let successKey = null;
 
-        if (!response.ok) {
-            console.error("❌ Midtrans Error Response:", JSON.stringify(transaction));
-            throw new Error(transaction.error_messages ? transaction.error_messages.join(', ') : "Midtrans API Error");
+        console.log(`🔄 Memulai Percobaan Transaksi ke Midtrans...`);
+
+        for (const key of candidateKeys) {
+            try {
+                const authString = Buffer.from(key + ":").toString('base64');
+                console.log(`👉 Mencoba dengan Key: ${key.substring(0, 5)}...`);
+
+                const response = await fetch("https://app.sandbox.midtrans.com/snap/v1/transactions", {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${authString}`
+                    },
+                    body: JSON.stringify(parameter)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // Jika error 401, kita lanjut ke key berikutnya
+                    if (response.status === 401) {
+                        console.log(`⚠️ Gagal 401 dengan key ini. Lanjut...`);
+                        lastError = data;
+                        continue;
+                    }
+                    // Jika error lain (misal 400 validation), langsung throw
+                    throw new Error(data.error_messages ? data.error_messages.join(', ') : "Midtrans Error");
+                }
+
+                // Jika sukses
+                transaction = data;
+                successKey = key;
+                console.log(`✅ SUKSES! Key yang valid adalah: ${key.substring(0, 10)}...`);
+                break; // Keluar loop
+
+            } catch (err) {
+                console.error(`❌ Error saat mencoba key: ${err.message}`);
+                lastError = err;
+            }
+        }
+
+        if (!transaction) {
+            console.error("❌ SEMUA KEY GAGAL.");
+            throw new Error("Gagal Auth Midtrans (401) dengan semua kemungkinan Key. Cek Dashboard!");
         }
         
         console.log("✅ Snap Token Berhasil:", transaction.token);
