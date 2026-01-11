@@ -168,13 +168,11 @@ const armadas = [
     { name: "Sampri", type: "Innova", seats: 7, price: 180000, cat: "TRAVEL", img: "/logos/Sampri.jpg", fasilitas: ["Private"], deskripsi: "Serasa mobil pribadi." }
 ];
 
-// --- SEEDING DATA RUTE OTOMATIS ---
+// --- SEEDING DATA RUTE OTOMATIS (DIPERBAIKI) ---
 const seedRoutes = async () => {
     try {
-        const count = await Route.countDocuments();
-        if (count > 0) return;
-
-        console.log("⚙️ Database kosong, mengisi data rute otomatis...");
+        console.log("⚙️ Mengecek kelengkapan rute di Database...");
+        
         const routePairs = [
             { asal: "Medan", tujuan: "Pematang Siantar", jarak: "Dekat" },
             { asal: "Medan", tujuan: "Parapat", jarak: "Sedang" },
@@ -185,10 +183,17 @@ const seedRoutes = async () => {
         ];
         const jamKeberangkatan = ["08:00", "10:00", "14:00", "20:00"];
         
-        let idCounter = 1;
-        const newRoutes = [];
+        let totalAdded = 0;
+        
+        for (const pair of routePairs) {
+            // Cek apakah sudah ada rute untuk pasangan ini
+            const exists = await Route.findOne({ asal: pair.asal, tujuan: pair.tujuan });
+            if (exists) continue; // Skip jika sudah ada
 
-        routePairs.forEach(pair => {
+            console.log(`➕ Menambahkan rute baru: ${pair.asal} - ${pair.tujuan}`);
+            
+            const newRoutes = [];
+            // Gunakan armadas (global variable)
             armadas.forEach(op => {
                 jamKeberangkatan.forEach(jam => {
                     const pickupPoints = locationData[pair.asal]?.loket || ["Terminal Pusat"];
@@ -199,7 +204,7 @@ const seedRoutes = async () => {
                     realPrice = Math.ceil(realPrice / 5000) * 5000;
 
                     newRoutes.push({
-                        id: idCounter++,
+                        id: Math.floor(Math.random() * 1000000), // Random ID
                         asal: pair.asal, tujuan: pair.tujuan,
                         operator: op.name, tipe: op.type, jam: jam,
                         harga: realPrice, kategori: op.cat, image: op.img,
@@ -208,14 +213,23 @@ const seedRoutes = async () => {
                     });
                 });
             });
-        });
+            
+            if (newRoutes.length > 0) {
+                await Route.insertMany(newRoutes);
+                totalAdded += newRoutes.length;
+            }
+        }
         
-        await Route.insertMany(newRoutes);
-        console.log(`✅ Berhasil mengisi ${newRoutes.length} rute ke Database!`);
+        console.log(`✅ Seeding selesai. Menambahkan ${totalAdded} rute baru.`);
     } catch (e) { console.log("Gagal Seed:", e); }
 };
-// Tunggu koneksi DB sebentar sebelum seed
-setTimeout(seedRoutes, 5000); 
+
+// Endpoint Manual untuk memaksa seeding (bisa dipanggil dari browser)
+app.get('/api/debug/seed', async (req, res) => {
+    await seedRoutes();
+    res.json({ status: "Seeding selesai, coba refresh halaman pencarian." });
+});
+ 
 
 // Web3 Provider (Opsional/Lokal)
 const web3 = new Web3(process.env.RPC_ENDPOINT_URL || 'http://127.0.0.1:7545'); 
