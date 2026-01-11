@@ -610,7 +610,8 @@ app.post('/api/check-status', async (req, res) => {
 
                 if (recipientWalletAddress) {
                     const recipients = [recipientWalletAddress];
-                    const tokenURI = `https://api.naikajaa.com/tickets/metadata/${updatedOrder.orderId_Midtrans}`;
+                    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `${req.protocol}://${req.get('host')}`;
+                    const tokenURI = `${baseUrl}/api/tickets/metadata/${updatedOrder.orderId_Midtrans}`;
                     
                     console.log(`[BLOCKCHAIN] Minting Manual untuk: ${updatedOrder.orderId_Midtrans}`);
                     const hash = await mintTicketsAutomatically(recipients, tokenURI);
@@ -788,6 +789,31 @@ app.post('/api/verify-ticket', async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({ valid: false, pesan: err.message });
+    }
+});
+
+// --- METADATA NFT ENDPOINT ---
+app.get('/api/tickets/metadata/:orderId', async (req, res) => {
+    try {
+        const order = await Order.findOne({ orderId_Midtrans: req.params.orderId });
+        if (!order) return res.status(404).json({ error: 'Ticket not found' });
+
+        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `${req.protocol}://${req.get('host')}`;
+        
+        const metadata = {
+            name: `Tiket Bus ${order.rute}`,
+            description: `Tiket perjalanan ${order.rute} untuk ${order.namaPenumpang} pada ${order.tanggal}`,
+            image: `${baseUrl}/logos/Logo.png`, 
+            attributes: [
+                { trait_type: "Passenger", value: order.namaPenumpang },
+                { trait_type: "Route", value: order.rute },
+                { trait_type: "Date", value: order.tanggal },
+                { trait_type: "Seat", value: order.seatNumber.toString() }
+            ]
+        };
+        res.json(metadata);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
