@@ -458,7 +458,9 @@ app.post('/midtrans-notification', async (req, res) => {
 
                     if (recipientWalletAddress) {
                         const recipients = [recipientWalletAddress];
-                        const tokenURI = `https://api.naikajaa.com/tickets/metadata/${updatedOrder.orderId_Midtrans}`;
+                        // GUNAKAN BASE URL DARI REQUEST UNTUK METADATA
+                        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `${req.protocol}://${req.get('host')}`;
+                        const tokenURI = `${baseUrl}/api/tickets/metadata/${updatedOrder.orderId_Midtrans}`;
                         
                         console.log(`[BLOCKCHAIN] Memulai Minting Otomatis untuk Order ID: ${updatedOrder.orderId_Midtrans}`);
                         const hash = await mintTicketsAutomatically(recipients, tokenURI);
