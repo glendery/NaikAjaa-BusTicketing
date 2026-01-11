@@ -14,6 +14,7 @@ const { mintTicketsAutomatically } = require('./mintingService');
 const { User, Route, Order, Promo, AuditLog } = require('./models');
 
 const app = express();
+app.set('trust proxy', 1); // Diperlukan untuk Vercel/Rate Limit
 app.disable('x-powered-by')
 app.use(express.json());
 app.use(cors({
@@ -136,12 +137,16 @@ if (!MONGO_URI) {
 
 // --- KONFIGURASI MIDTRANS (DIPERBAIKI) ---
 // Deteksi otomatis environment berdasarkan format Server Key
-const isProduction = process.env.MIDTRANS_SERVER_KEY && !process.env.MIDTRANS_SERVER_KEY.startsWith('SB-');
+const rawServerKey = process.env.MIDTRANS_SERVER_KEY || "";
+const serverKey = rawServerKey.replace(/\s/g, ''); // Hapus spasi/newline otomatis
+
+const isProduction = serverKey && !serverKey.startsWith('SB-');
 const snap = new midtransClient.Snap({
     isProduction: isProduction,
-    serverKey: process.env.MIDTRANS_SERVER_KEY
+    serverKey: serverKey
 });
 console.log(`💳 Midtrans Mode: ${isProduction ? 'PRODUCTION' : 'SANDBOX'}`);
+console.log(`🔑 Server Key Length: ${serverKey.length} chars (Sanitized)`);
 
 app.get('/api', (req, res) => {
     res.send('Backend NaikAjaa is running!');
