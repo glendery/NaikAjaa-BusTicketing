@@ -1,0 +1,8 @@
+# Dependency
+/node_modules
+
+# Kunci Rahasia (Wajib Disimpan)
+.env
+
+# Log dan Cache
+npm-debug.log
