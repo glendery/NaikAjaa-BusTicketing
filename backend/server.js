@@ -809,8 +809,8 @@ app.get('/api/seats', async (req, res) => {
       status: { $nin: ['CANCEL', 'GAGAL'] } 
     });
 
-    // Ambil nomor kursinya saja
-    const bookedSeats = bookedOrders.map(order => parseInt(order.seatNumber));
+    // Ambil nomor kursinya saja (biarkan String agar support 1A, 1B, dll)
+    const bookedSeats = bookedOrders.map(order => order.seatNumber);
 
     res.json({ 
       success: true, 

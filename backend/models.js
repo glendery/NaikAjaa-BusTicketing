@@ -44,7 +44,7 @@ const OrderSchema = new mongoose.Schema({
     tokenId_NFT: String,
     status: { type: String, default: 'PENDING' },
     kategori: String,
-    seatNumber: Number,
+    seatNumber: String,
     lokasi_jemput: String,
     lokasi_turun: String,
     namaPenumpang: String,
