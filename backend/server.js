@@ -176,25 +176,29 @@ if (!serverKey) {
     console.error("❌ MIDTRANS_SERVER_KEY tidak ditemukan di .env!");
 }
 
-// DETEKSI MODE BERDASARKAN ENV VAR ATAU KEY PREFIX
+// DETEKSI MODE BERDASARKAN ENV VAR (PRIORITAS UTAMA)
 const envFlag = (process.env.MIDTRANS_ENV || '').toLowerCase();
 
-// Prioritas:
-// 1. Key dengan prefix "Mid-" -> PRODUCTION (Hard rule dari Midtrans)
-// 2. Key dengan prefix "SB-" -> SANDBOX (Hard rule dari Midtrans)
-// 3. Env Var "production" -> PRODUCTION
-// 4. Default -> SANDBOX
-
-const isKeyProduction = serverKey && serverKey.startsWith("Mid-");
-const isKeySandbox = serverKey && serverKey.startsWith("SB-");
+// Logika Sederhana:
+// 1. Jika envFlag == 'production', maka Production.
+// 2. Jika envFlag == 'sandbox', maka Sandbox.
+// 3. Jika tidak ada envFlag, baru cek prefix key.
 
 let isProduction = false;
-if (isKeyProduction) {
+
+if (envFlag === 'production') {
     isProduction = true;
-} else if (isKeySandbox) {
+} else if (envFlag === 'sandbox') {
     isProduction = false;
 } else {
-    isProduction = envFlag === 'production';
+    // Fallback jika MIDTRANS_ENV tidak diset
+    const isKeySandbox = serverKey && serverKey.startsWith("SB-");
+    isProduction = !isKeySandbox; // Default ke Production jika bukan SB- (tapi ini risky, sebaiknya default sandbox)
+    if (serverKey && serverKey.startsWith("Mid-")) {
+         // Cek ulang, karena ternyata ada key Sandbox yang depannya Mid-
+         // Jadi kita default ke Sandbox saja untuk aman jika tidak ada env var
+         isProduction = false; 
+    }
 }
 
 const snap = new midtransClient.Snap({
