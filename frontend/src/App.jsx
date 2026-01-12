@@ -873,12 +873,38 @@ function Dashboard() {
 }
 
 function App() {
+  // --- DYNAMIC MIDTRANS SCRIPT LOADER ---
+  useEffect(() => {
+    // Pastikan config sudah diload
+    const clientKey = config.MIDTRANS_CLIENT_KEY;
+    
+    // Deteksi Mode berdasarkan prefix Key (SB- = Sandbox)
+    const isSandbox = clientKey && clientKey.startsWith("SB-");
+    
+    const scriptUrl = isSandbox 
+      ? "https://app.sandbox.midtrans.com/snap/snap.js"
+      : "https://app.midtrans.com/snap/snap.js";
+
+    const scriptId = "midtrans-script";
+    
+    // Hindari double load
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.src = scriptUrl;
+      script.id = scriptId;
+      script.setAttribute("data-client-key", clientKey);
+      script.async = true;
+      document.body.appendChild(script);
+      console.log(`Midtrans Script Loaded: ${isSandbox ? "SANDBOX" : "PRODUCTION"} (Key: ${clientKey})`);
+    }
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/booking" element={<BookingPage />} /> // Tambahkan rute ini
+      <Route path="/booking" element={<BookingPage />} /> 
     </Routes>
   );
 }

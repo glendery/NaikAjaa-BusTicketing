@@ -176,7 +176,26 @@ if (!serverKey) {
     console.error("❌ MIDTRANS_SERVER_KEY tidak ditemukan di .env!");
 }
 
-const isProduction = false; // WAJIB false untuk Sandbox sesuai instruksi user
+// DETEKSI MODE BERDASARKAN ENV VAR ATAU KEY PREFIX
+const envFlag = (process.env.MIDTRANS_ENV || '').toLowerCase();
+
+// Prioritas:
+// 1. Key dengan prefix "Mid-" -> PRODUCTION (Hard rule dari Midtrans)
+// 2. Key dengan prefix "SB-" -> SANDBOX (Hard rule dari Midtrans)
+// 3. Env Var "production" -> PRODUCTION
+// 4. Default -> SANDBOX
+
+const isKeyProduction = serverKey && serverKey.startsWith("Mid-");
+const isKeySandbox = serverKey && serverKey.startsWith("SB-");
+
+let isProduction = false;
+if (isKeyProduction) {
+    isProduction = true;
+} else if (isKeySandbox) {
+    isProduction = false;
+} else {
+    isProduction = envFlag === 'production';
+}
 
 const snap = new midtransClient.Snap({
     isProduction: isProduction,
@@ -492,7 +511,7 @@ app.post('/api/admin/add-route', async (req, res) => {
 });
 
 // --- [ENDPOINT PENTING] WEBHOOK + EMAIL OTOMATIS ---
-app.post('/midtrans-notification', async (req, res) => {
+app.post('/api/midtrans-notification', async (req, res) => {
     try {
         await connectToDatabase();
         // Debug: Log payload yang masuk
