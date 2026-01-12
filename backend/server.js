@@ -771,6 +771,7 @@ app.post('/api/check-status', async (req, res) => {
 
 app.get('/api/seats', async (req, res) => {
   try {
+    await connectToDatabase(); // Pastikan DB terkoneksi
     const { date, destination } = req.query; 
     
     // Validasi input
@@ -778,12 +779,15 @@ app.get('/api/seats', async (req, res) => {
       return res.status(400).json({ error: 'Tanggal dan tujuan harus diisi' });
     }
 
+    // Dekode destination jika perlu (meskipun express biasanya auto-decode query params)
+    const ruteTujuan = decodeURIComponent(destination);
+
     // Cari di tabel 'Order' (bukan Ticket)
     // Filter status: Jangan ambil yang 'CANCEL' atau 'GAGAL'
     const bookedOrders = await Order.find({
-      rute: destination,        // Sesuai field di database kamu ('rute')
-      tanggal: date,            // Sesuai field di database kamu ('tanggal')
-      status: { $nin: ['CANCEL', 'GAGAL'] } // Ambil yang LUNAS, PENDING, atau MINTED
+      rute: { $regex: new RegExp(ruteTujuan, 'i') }, // Pencarian case-insensitive & partial match agar lebih robust
+      tanggal: date,            
+      status: { $nin: ['CANCEL', 'GAGAL'] } 
     });
 
     // Ambil nomor kursinya saja

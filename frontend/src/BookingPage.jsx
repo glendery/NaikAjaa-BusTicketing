@@ -28,7 +28,12 @@ const BookingPage = () => {
         setLoading(true);
         
         // Fetch API menggunakan data dinamis yang sudah divalidasi
-        const response = await fetch(`${config.API_BASE_URL}/seats?date=${selectedDate}&destination=${selectedRoute}`);
+        const response = await fetch(`${config.API_BASE_URL}/seats?date=${selectedDate}&destination=${encodeURIComponent(selectedRoute)}`);
+        
+        if (!response.ok) {
+           throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
         if (data.success) {
