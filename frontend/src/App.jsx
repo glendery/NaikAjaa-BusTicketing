@@ -2,7 +2,7 @@ import Swal from 'sweetalert2';
 import './App.css';
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useSearchParams } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
 import BookingPage from './BookingPage';
@@ -279,13 +279,17 @@ const BuyModal = ({ item, user, userPickup, userDropOff, onClose, onSuccess }) =
 // --- DASHBOARD UTAMA ---
 function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [user] = useState(() => { 
     const dataUser = localStorage.getItem('userBus');
     return dataUser ? JSON.parse(dataUser) : null;
 });
 
-  const [activeTab, setActiveTab] = useState('home'); 
+  // --- PERUBAHAN: GUNAKAN URL SEARCH PARAMS AGAR PERSIST SAAT REFRESH ---
+  const activeTab = searchParams.get('tab') || 'home';
+  const setActiveTab = (tab) => setSearchParams({ tab });
+ 
   const [rute, setRute] = useState([]);
   const [history, setHistory] = useState([]);
   
@@ -308,7 +312,6 @@ function Dashboard() {
   // STATES ADMIN DASHBOARD
   const [stats, setStats] = useState({ totalTiket: 0, totalPendapatan: 0, recentOrders: [] });
   const [auditLogs, setAuditLogs] = useState([]); // State untuk Audit Log
-  const [scanResult, setScanResult] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
 
   // FETCH STATS (Saat Admin Tab Aktif)
@@ -350,7 +353,7 @@ function Dashboard() {
                     Swal.fire('❌ TIKET TIDAK VALID', res.data.pesan, 'error');
                 }
             })
-            .catch(err => Swal.fire('Error', 'Gagal verifikasi tiket', 'error'));
+            .catch(() => Swal.fire('Error', 'Gagal verifikasi tiket', 'error'));
       }
   };
 
